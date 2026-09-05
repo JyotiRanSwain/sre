@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel | Sri Ram Energy Space System</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../images/logo.png">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  :root{ --adm-bg:#0B1626; --adm-panel:#101E33; --adm-line:rgba(255,255,255,0.08); }
+  body{ padding-top:0; background: var(--adm-bg); }
+  .site-header, .mobile-nav, .site-footer, .float-stack{ display:none !important; }
+
+  #admin-login{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(60% 60% at 20% 20%, rgba(11,94,215,0.25), transparent 60%),
+                radial-gradient(50% 50% at 85% 80%, rgba(253,184,19,0.15), transparent 60%), var(--adm-bg);
+    padding: 24px;
+  }
+  .login-card{ background:#101E33; border:1px solid var(--adm-line); border-radius:24px; padding:44px 36px; width:100%; max-width:400px; box-shadow: 0 30px 80px rgba(0,0,0,0.4); }
+  .login-card img{ height:48px; margin-bottom:20px; }
+  .login-card h1{ color:#fff; font-size:1.5rem; margin-bottom:6px; }
+  .login-card p.sub{ color:rgba(255,255,255,0.55); margin-bottom:28px; font-size:.9rem; }
+  .login-card label{ color:#fff; }
+  .login-card input{ background: rgba(255,255,255,0.06); border:1px solid var(--adm-line); color:#fff; }
+  .login-card input:focus{ border-color:var(--blue-light); }
+
+  #admin-dashboard{ display:none; min-height:100vh; }
+  .adm-sidebar{
+    width:250px; background: var(--adm-panel); border-right:1px solid var(--adm-line);
+    padding:24px 18px; display:flex; flex-direction:column; gap:6px; position:fixed; top:0; bottom:0; left:0;
+  }
+  .adm-sidebar .brand-row{ display:flex; align-items:center; gap:10px; padding:6px 10px 22px; }
+  .adm-sidebar .brand-row img{ height:36px; }
+  .adm-sidebar .brand-row span{ color:#fff; font-weight:800; font-family:'Manrope',sans-serif; font-size:.95rem; }
+  .adm-tab{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:12px;
+    color:rgba(255,255,255,0.65); font-weight:600; background:transparent; border:none; text-align:left; width:100%; font-size:.95rem;
+  }
+  .adm-tab:hover{ background: rgba(255,255,255,0.06); color:#fff; }
+  .adm-tab.active{ background: var(--grad-sky); color:#fff; }
+  .adm-main{ margin-left:250px; padding:32px 36px; flex:1; }
+  .adm-topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
+  .adm-topbar h2{ color:#fff; margin:0; }
+  .adm-topbar p{ color: rgba(255,255,255,0.5); margin:0; }
+  .adm-cards{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:32px; }
+  .adm-card{ background: var(--adm-panel); border:1px solid var(--adm-line); border-radius:16px; padding:22px; }
+  .adm-card .num{ color:#fff; font-family:'Manrope',sans-serif; font-weight:800; font-size:1.8rem; }
+  .adm-card .lbl{ color: rgba(255,255,255,0.5); font-size:.85rem; }
+  .adm-panel-box{ background: var(--adm-panel); border:1px solid var(--adm-line); border-radius:16px; padding:24px; }
+  .adm-table{ width:100%; border-collapse:collapse; color:#fff; }
+  .adm-table th{ text-align:left; padding:12px; font-size:.8rem; color:rgba(255,255,255,0.5); border-bottom:1px solid var(--adm-line); }
+  .adm-table td{ padding:12px; border-bottom:1px solid var(--adm-line); font-size:.9rem; }
+  .adm-form label{ color:#fff; }
+  .adm-form input, .adm-form textarea{ background: rgba(255,255,255,0.06); border:1px solid var(--adm-line); color:#fff; }
+  .dropzone{
+    border:2px dashed var(--adm-line); border-radius:14px; padding:28px; text-align:center; color:rgba(255,255,255,0.55);
+    cursor:pointer; margin-bottom:16px;
+  }
+  .dropzone:hover{ border-color: var(--blue-light); }
+  #image-preview{ display:none; max-width:220px; border-radius:12px; margin-bottom:16px; }
+  .confirm-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center;
+    z-index:3000; opacity:0; pointer-events:none; transition:opacity .3s;
+  }
+  .confirm-overlay.open{ opacity:1; pointer-events:auto; }
+  .confirm-box{ background:#101E33; border:1px solid var(--adm-line); border-radius:16px; padding:28px; max-width:340px; text-align:center; color:#fff; }
+  .confirm-box .row{ display:flex; gap:12px; margin-top:20px; }
+  .mobile-sidebar-toggle{ display:none; }
+  @media (max-width: 900px){
+    .adm-sidebar{ transform: translateX(-100%); transition: transform .3s; z-index:1500; }
+    .adm-sidebar.open{ transform: translateX(0); }
+    .adm-main{ margin-left:0; padding:20px; }
+    .mobile-sidebar-toggle{ display:inline-flex; }
+    .adm-cards{ grid-template-columns:repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="admin-login">
+  <div class="login-card">
+    <img src="../images/logo.png" alt="Sri Ram Energy Space System logo">
+    <h1>Admin Login</h1>
+    <p class="sub">Sign in to manage projects and messages.</p>
+    <form id="admin-login-form">
+      <div class="field"><label for="a-user">Username</label><input id="a-user" name="username" type="text" required autocomplete="username"></div>
+      <div class="field"><label for="a-pass">Password</label><input id="a-pass" name="password" type="password" required autocomplete="current-password"></div>
+      <button type="submit" class="btn btn-solar btn-block">Login</button>
+    </form>
+    <p style="color:rgba(255,255,255,0.4); font-size:.78rem; margin-top:18px;">Authentication is verified server-side via Google Apps Script. No credentials are stored in this page.</p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="admin-dashboard" style="display:flex;">
+  <aside class="adm-sidebar" id="adm-sidebar">
+    <div class="brand-row"><img src="../images/logo.png" alt="logo"><span>SRI RAM ADMIN</span></div>
+    <button class="adm-tab active" data-tab="dashboard">📊 Dashboard</button>
+    <button class="adm-tab" data-tab="projects">🗂️ Projects</button>
+    <button class="adm-tab" data-tab="add-project">➕ Add Project</button>
+    <button class="adm-tab" data-tab="messages">✉️ Messages</button>
+    <button class="adm-tab" data-logout style="margin-top:auto;">🚪 Logout</button>
+  </aside>
+
+  <main class="adm-main">
+    <div class="adm-topbar">
+      <div>
+        <h2>Admin Dashboard</h2>
+        <p>Manage your projects and customer messages.</p>
+      </div>
+      <button class="btn btn-ghost mobile-sidebar-toggle" id="sidebar-toggle" style="color:#fff;border-color:var(--adm-line);">☰ Menu</button>
+    </div>
+
+    <div data-panel="dashboard">
+      <div class="adm-cards">
+        <div class="adm-card"><div class="num" id="stat-total">0</div><div class="lbl">Total Projects</div></div>
+        <div class="adm-card"><div class="num" id="stat-active">0</div><div class="lbl">Active Projects</div></div>
+        <div class="adm-card"><div class="num" id="stat-messages">—</div><div class="lbl">Messages</div></div>
+        <div class="adm-card"><div class="num" id="stat-latest" style="font-size:1rem;">—</div><div class="lbl">Latest Project</div></div>
+      </div>
+      <div class="adm-panel-box">
+        <p style="color:rgba(255,255,255,0.6);">Use the sidebar to add new projects or review recent customer enquiries.</p>
+      </div>
+    </div>
+
+    <div data-panel="projects" style="display:none;">
+      <div class="adm-panel-box" style="overflow-x:auto;">
+        <table class="adm-table">
+          <thead><tr><th>Image</th><th>Title</th><th>Created</th><th>Updated</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="admin-projects-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div data-panel="add-project" style="display:none;">
+      <div class="adm-panel-box adm-form" style="max-width:560px;">
+        <h3 id="project-form-heading" style="color:#fff;">Add Project</h3>
+        <form id="project-form">
+          <div class="dropzone" onclick="document.getElementById('project-image').click()">
+            📤 Click to upload project image (JPG, PNG, WEBP — max 5MB)
+            <input type="file" id="project-image" accept="image/jpeg,image/png,image/webp" style="display:none;">
+          </div>
+          <img id="image-preview" alt="Preview">
+          <div class="field"><label for="p-title">Project Title</label><input id="p-title" name="title" type="text" required></div>
+          <div class="field"><label for="p-story">Project Story</label><textarea id="p-story" name="story" rows="5" required></textarea></div>
+          <button type="submit" class="btn btn-solar btn-block">Publish Project</button>
+        </form>
+      </div>
+    </div>
+
+    <div data-panel="messages" style="display:none;">
+      <div class="adm-panel-box">
+        <p style="color:rgba(255,255,255,0.6);">Contact form messages are stored in the "Messages" Google Sheet. Connect Google Apps Script and add a <code>getMessages</code> action to list them here (see README).</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="confirm-overlay" id="confirm-dialog">
+  <div class="confirm-box">
+    <h3>Delete Project?</h3>
+    <p style="color:rgba(255,255,255,0.6);">Are you sure you want to delete this project? This cannot be undone.</p>
+    <div class="row">
+      <button class="btn btn-ghost btn-block" data-confirm-no style="color:#fff;border-color:var(--adm-line);">Cancel</button>
+      <button class="btn btn-solar btn-block" data-confirm-yes>Delete</button>
+    </div>
+  </div>
+</div>
+
+<script src="../js/main.js"></script>
+<script>
+  document.getElementById("sidebar-toggle")?.addEventListener("click", () => {
+    document.getElementById("adm-sidebar").classList.toggle("open");
+  });
+</script>
+</body>
+</html>
