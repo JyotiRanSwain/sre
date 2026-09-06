@@ -46,7 +46,7 @@
 }
 
 *,*::before,*::after{ box-sizing: border-box; }
-html{ scroll-behavior: smooth; }
+html{ scroll-behavior: smooth; overflow-x: hidden; width:100%; }
 @media (prefers-reduced-motion: reduce){
   html{ scroll-behavior: auto; }
   *,*::before,*::after{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
@@ -59,9 +59,12 @@ body{
   background: var(--grad-mesh-soft) fixed, var(--bg);
   line-height: 1.6;
   overflow-x: hidden;
+  width:100%;
+  max-width:100vw;
 }
 
 img{ max-width:100%; display:block; }
+iframe{ max-width:100%; display:block; border:0; }
 a{ color:inherit; text-decoration:none; }
 ul{ margin:0; padding:0; list-style:none; }
 button{ font-family:inherit; cursor:pointer; }
@@ -152,13 +155,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   box-shadow: 0 4px 30px rgba(6,26,58,0.1);
 }
 /* On load the header floats transparently over the hero/banner — no white
-   strip covering the video/image. It only becomes solid once scrolled. */
-.site-header .main-nav a{ color:#fff; }
+   strip covering the video/image. It only becomes solid once scrolled.
+   Text-shadow guards legibility against bright photo/video backgrounds. */
+.site-header .main-nav a{ color:#fff; text-shadow: 0 1px 4px rgba(0,0,0,0.45); }
 .site-header .main-nav a:hover, .site-header .main-nav a.active{ background: rgba(255,255,255,0.16); color:#fff; }
-.site-header .hamburger span{ background:#fff; }
-.site-header.scrolled .main-nav a{ color: var(--navy); }
+.site-header.scrolled .main-nav a{ color: var(--navy); text-shadow:none; }
 .site-header.scrolled .main-nav a:hover, .site-header.scrolled .main-nav a.active{ background: rgba(11,94,215,0.08); color: var(--blue); }
-.site-header.scrolled .hamburger span{ background: var(--navy); }
 .site-header .btn-solar{ box-shadow: 0 8px 22px rgba(255,140,0,0.45); }
 .header-inner{
   width:100%; max-width: var(--container); margin:0 auto; padding:0 24px;
@@ -175,29 +177,34 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .main-nav a:hover, .main-nav a.active{ background: rgba(11,94,215,0.08); color: var(--blue); }
 
-.header-actions{ display:flex; align-items:center; gap:14px; }
+.header-actions{ display:flex; align-items:center; gap:14px; flex-shrink:0; }
 .hamburger{
-  display:none; flex-direction:column; justify-content:center; gap:5px;
-  width:44px; height:44px; border:none; background:transparent; border-radius:10px;
+  display:none; flex-direction:column; justify-content:center; align-items:center; gap:5px;
+  width:44px; height:44px; border:none; border-radius:12px; flex-shrink:0;
+  background: rgba(6,26,58,0.32);
+  transition: background .3s;
 }
-.hamburger span{ width:24px; height:2.5px; background: var(--navy); border-radius:2px; transition: transform .3s var(--ease), opacity .3s; margin:0 auto; }
+.hamburger span{ width:22px; height:2.5px; background: #fff; border-radius:2px; transition: transform .3s var(--ease), opacity .3s; box-shadow: 0 1px 2px rgba(0,0,0,0.35); }
 .hamburger.open span:nth-child(1){ transform: translateY(7.5px) rotate(45deg); }
 .hamburger.open span:nth-child(2){ opacity:0; }
 .hamburger.open span:nth-child(3){ transform: translateY(-7.5px) rotate(-45deg); }
+.site-header.scrolled .hamburger{ background: rgba(11,94,215,0.08); }
+.site-header.scrolled .hamburger span{ background: var(--navy); box-shadow:none; }
 
 .mobile-nav{
   position: fixed; inset:0; z-index:999;
   background: var(--navy);
   display:flex; flex-direction:column; padding: 110px 32px 40px;
   transform: translateX(100%); transition: transform .5s var(--ease);
+  overflow-y:auto;
 }
 .mobile-nav.open{ transform: translateX(0); }
-.mobile-nav a{
+.mobile-nav a:not(.btn){
   color:#fff; font-family:'Manrope',sans-serif; font-weight:700; font-size:1.6rem;
   padding: 14px 0; border-bottom:1px solid rgba(255,255,255,0.12);
   opacity:0; transform: translateX(28px);
 }
-.mobile-nav.open a{ animation: navIn .5s var(--ease) forwards; }
+.mobile-nav.open a:not(.btn){ animation: navIn .5s var(--ease) forwards; }
 .mobile-nav.open a:nth-child(1){ animation-delay:.08s; }
 .mobile-nav.open a:nth-child(2){ animation-delay:.14s; }
 .mobile-nav.open a:nth-child(3){ animation-delay:.20s; }
@@ -206,7 +213,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .mobile-nav.open a:nth-child(6){ animation-delay:.38s; }
 .mobile-nav.open a:nth-child(7){ animation-delay:.44s; }
 @keyframes navIn{ to{ opacity:1; transform:none; } }
-.mobile-nav .btn{ margin-top:24px; }
+/* The CTA button is a .btn, not a nav link — kept out of the link rules above
+   so its own pill shape, padding and font-size are never overridden. */
+.mobile-nav .btn{
+  margin-top:24px; flex-shrink:0; width:100%; max-width:100%;
+  opacity:0; transform: translateX(28px);
+}
+.mobile-nav.open .btn{ animation: navIn .5s var(--ease) forwards; animation-delay:.5s; }
 
 @media (max-width: 980px){
   .main-nav{ display:none; }
