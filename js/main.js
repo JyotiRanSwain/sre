@@ -432,16 +432,48 @@ function initAdmin() {
     });
   });
 
-  async function loadDashboardData() {
+    async function loadDashboardData() {
+    let projects = SAMPLE_PROJECTS;
     try {
       const res = await callGAS("getProjects", null, "GET");
-      const projects = (res && res.success) ? res.data : SAMPLE_PROJECTS;
-      renderAdminStats(projects);
-      renderAdminTable(projects);
-    } catch (err) {
-      renderAdminStats(SAMPLE_PROJECTS);
-      renderAdminTable(SAMPLE_PROJECTS);
+      if (res && res.success) projects = res.data;
+    } catch (err) { /* fall back to sample data */ }
+    renderAdminTable(projects);
+
+    let messages = [];
+    try {
+      const mres = await callGAS("getMessages", { token: adminToken() }, "POST");
+      if (mres && mres.success) messages = mres.data;
+    } catch (err) { /* leave empty */ }
+    renderAdminMessages(messages);
+
+    renderAdminStats(projects, messages);
+  }
+
+  function renderAdminStats(projects, messages) {
+    qs("#stat-total") && (qs("#stat-total").textContent = projects.length);
+    qs("#stat-active") && (qs("#stat-active").textContent = projects.filter(p => (p.status || "active") === "active").length);
+    const sorted = sortProjects(projects);
+    qs("#stat-latest") && (qs("#stat-latest").textContent = sorted[0] ? sorted[0].title : "—");
+    qs("#stat-messages") && (qs("#stat-messages").textContent = messages ? messages.length : "0");
+  }
+
+  function renderAdminMessages(messages) {
+    const tbody = qs("#admin-messages-body");
+    if (!tbody) return;
+    if (!messages.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:rgba(255,255,255,0.5);">No messages yet.</td></tr>`;
+      return;
     }
+    tbody.innerHTML = messages.map(m => `
+      <tr>
+        <td>${m.name || ""}</td>
+        <td>${m.phone || ""}</td>
+        <td>${m.email || ""}</td>
+        <td>${m.subject || ""}</td>
+        <td style="max-width:260px;white-space:normal;">${m.message || ""}</td>
+        <td>${formatDate(m.created_at)}</td>
+      </tr>`).join("");
   }
 
   function renderAdminStats(projects) {
