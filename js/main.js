@@ -8,7 +8,7 @@
    Set GOOGLE_SCRIPT_URL below once you deploy the Apps Script Web App.
    ========================================================================== */
 
-const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwGZ_8X6aMHdjRBEQdpnXzC7I0i2g-u0zwqjyU6Xkkf3PEVJvL5p1GrolzQBeWDJoLH/exec";
 
 const COMPANY = {
   name: "Sri Ram Energy Space System",
@@ -30,22 +30,24 @@ function waLink(message) {
 
 async function callGAS(action, payload, method) {
   method = method || (payload ? "POST" : "GET");
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.indexOf("YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL") !== -1) {
+  
+  // FIXED: Only block execution if GOOGLE_SCRIPT_URL is empty
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.trim() === "") {
     throw new Error("GAS_NOT_CONFIGURED");
   }
+
   const url = method === "GET"
     ? `${GOOGLE_SCRIPT_URL}?action=${encodeURIComponent(action)}`
     : GOOGLE_SCRIPT_URL;
   const opts = { method };
   if (method === "POST") {
-    opts.headers = { "Content-Type": "text/plain;charset=utf-8" }; // avoids CORS preflight on Apps Script
+    opts.headers = { "Content-Type": "text/plain;charset=utf-8" };
     opts.body = JSON.stringify(Object.assign({ action }, payload || {}));
   }
   const res = await fetch(url, opts);
   if (!res.ok) throw new Error("NETWORK_ERROR");
   return res.json();
 }
-
 /* -------------------------------------------------------------------- */
 /*  Header: scroll state + compact on scroll                            */
 /* -------------------------------------------------------------------- */
